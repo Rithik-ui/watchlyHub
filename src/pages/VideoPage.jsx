@@ -6,7 +6,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import RecommendedVideos from "../components/RecommendedVideos";
-import { API_KEY , BASE_URL } from "../api/youtubeAPI";
+import { API_KEY, BASE_URL } from "../api/youtubeAPI";
 
 const VideoPage = () => {
   const { videoId } = useParams();
@@ -17,40 +17,20 @@ const VideoPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
-
     const fetchVideoDetails = async () => {
       try {
         const videoResponse = await axios.get(`${BASE_URL}/videos`, {
-          params: {
-            part: "snippet,statistics",
-            id: videoId,
-            key: API_KEY,
-          },
+          params: { part: "snippet,statistics", id: videoId, key: API_KEY },
         });
-
-        
         const video = videoResponse.data.items[0];
 
         const commentResponse = await axios.get(`${BASE_URL}/commentThreads`, {
-          params: {
-            part: "snippet",
-            videoId,
-            key: API_KEY,
-            maxResults: 100,
-          },
+          params: { part: "snippet", videoId, key: API_KEY, maxResults: 100 },
         });
-
-       
 
         const channelResponse = await axios.get(`${BASE_URL}/channels`, {
-          params: {
-            part: "statistics",
-            id: video.snippet.channelId,
-            key: API_KEY,
-          },
+          params: { part: "statistics", id: video.snippet.channelId, key: API_KEY },
         });
-
-        
 
         setVideoData(video);
         setComments(commentResponse.data.items);
@@ -69,19 +49,21 @@ const VideoPage = () => {
     return <Box display="flex" justifyContent="center" alignItems="center" height="100vh"><CircularProgress /></Box>;
   }
 
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat("en-US", {
-      notation: "compact",
-      compactDisplay: "short",
-    }).format(num);
-  };
+  const formatNumber = (num) => new Intl.NumberFormat("en-US", { notation: "compact", compactDisplay: "short" }).format(num);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "row", gap: 3, p: 3, pt:5 }}>
+    <Box sx={{ 
+      display: "flex", 
+      flexDirection: { xs: "column", md: "row" }, 
+      gap: 3, 
+      p: { xs: 1, md: 3 }, 
+      pt: { xs: 3, md: 5 } 
+    }}>
+      
+      {/* Video Player and Details */}
       <Box sx={{ flex: 2 }}>
         <iframe
-          width="100%"
-          height="500px"
+          style={{ width: "100%", height: "auto", aspectRatio: "16/9" }}
           src={`https://www.youtube.com/embed/${videoId}?autoplay=1&=1`}
           title="YouTube video player"
           frameBorder="0"
@@ -93,6 +75,7 @@ const VideoPage = () => {
           {videoData?.snippet?.title}
         </Typography>
 
+        {/* Channel Info */}
         <Box display="flex" alignItems="center" gap={2} sx={{ mt: 1 }}>
           <Avatar src={videoData?.snippet?.thumbnails?.high?.url} />
           <Box>
@@ -103,6 +86,7 @@ const VideoPage = () => {
           </Box>
         </Box>
 
+        {/* Stats (Views, Likes, Dislikes) */}
         <Box display="flex" alignItems="center" gap={3} sx={{ mt: 2 }}>
           <Typography variant="body1" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <VisibilityIcon fontSize="small" /> {formatNumber(videoData?.statistics?.viewCount)} views
@@ -115,6 +99,7 @@ const VideoPage = () => {
           </Button>
         </Box>
 
+        {/* Video Description */}
         <Typography variant="body1" sx={{ mt: 2, backgroundColor: "#f5f5f5", p: 2, borderRadius: 2 }}>
           {showFullDescription ? videoData?.snippet?.description : `${videoData?.snippet?.description.slice(0, 300)}...`}
           <Button variant="text" onClick={() => setShowFullDescription(!showFullDescription)}>
@@ -122,8 +107,9 @@ const VideoPage = () => {
           </Button>
         </Typography>
 
+        {/* Comments Section */}
         <Typography variant="h6" sx={{ mt: 3 }}>💬 Comments</Typography>
-        <Box sx={{ mt: 1, maxHeight: "500px", overflowY: "auto" }}>
+        <Box sx={{ mt: 1, maxHeight: "500px", overflowY: "auto", width: "100%", px: { xs: 1, md: 2 } }}>
           {comments.map((comment) => (
             <Box key={comment.id} sx={{ mt: 2, p: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}>
               <Box display="flex" alignItems="center" gap={2}>
@@ -149,7 +135,7 @@ const VideoPage = () => {
       </Box>
 
       {/* Recommended Videos */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, display: { xs: "none", md: "block" } }}>
         <RecommendedVideos videoId={videoId} videoTitle={videoData?.snippet?.title} />
       </Box>
     </Box>
@@ -157,6 +143,7 @@ const VideoPage = () => {
 };
 
 export default VideoPage;
+
 
 
 
